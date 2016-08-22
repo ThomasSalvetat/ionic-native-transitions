@@ -396,42 +396,57 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	            return this;
 	        }
+
+			function hideKeyboard() {
+				if (cordova && cordova.plugins && cordova.plugins.Keyboard) {
+					cordova.plugins.Keyboard.close();
+				}
+			}
+
+			function transition() {
+				if (!isEnabled()) {
+					return;
+				}
+				var options = {};
+				if (angular.isObject(arguments[0])) {
+					options = angular.extend({}, defaultBackTransition, arguments[0]);
+				} else if (angular.isString(arguments[0])) {
+					switch (arguments[0]) {
+						case 'back':
+							// First we check for state back transition
+							if (arguments[2] && getBackStateTransition(arguments[2])) {
+								options = getBackStateTransition(arguments[2]);
+								console.log('back first', options);
+							} // Then we check if the backInOppositeDirection option is enabled
+							else if (getDefaultOptions().backInOppositeDirection && arguments[1] && getStateTransition(arguments[1])) {
+								options = getStateTransition(arguments[1]);
+								if (options.direction) {
+									options.direction = oppositeDirections[options.direction];
+								}
+								console.log('back second', options);
+							} // otherwise we just use the default transition
+							else {
+								options = defaultBackTransition;
+								console.log('back default', options);
+							}
+							break;
+					}
+				} else {
+					options = defaultTransition;
+				}
+				options = angular.copy(options);
+
+				hideKeyboard();
+				$timeout(function() {
+					launchTransition(options);
+				});
+			}
 	
-	        function transition() {
-	            if (!isEnabled()) {
-	                return;
-	            }
-	            var options = {};
-	            if (angular.isObject(arguments[0])) {
-	                options = angular.extend({}, defaultBackTransition, arguments[0]);
-	            } else if (angular.isString(arguments[0])) {
-	                switch (arguments[0]) {
-	                    case 'back':
-	                        // First we check for state back transition
-	                        if (arguments[2] && getBackStateTransition(arguments[2])) {
-	                            options = getBackStateTransition(arguments[2]);
-	                            console.log('back first', options);
-	                        } // Then we check if the backInOppositeDirection option is enabled
-	                        else if (getDefaultOptions().backInOppositeDirection && arguments[1] && getStateTransition(arguments[1])) {
-	                                options = getStateTransition(arguments[1]);
-	                                if (options.direction) {
-	                                    options.direction = oppositeDirections[options.direction];
-	                                }
-	                                console.log('back second', options);
-	                            } // otherwise we just use the default transition
-	                            else {
-	                                    options = defaultBackTransition;
-	                                    console.log('back default', options);
-	                                }
-	                        break;
-	                }
-	            } else {
-	                options = defaultTransition;
-	            }
-	            options = angular.copy(options);
+	        function launchTransition(options) {
 	            $log.debug('[native transition]', options);
 	            var type = options.type;
 	            delete options.type;
+
 	            $rootScope.$broadcast('ionicNativeTransitions.beforeTransition');
 	            window.plugins.nativepagetransitions[type](options, transitionSuccess.bind(this, getTransitionDuration(options)), transitionError.bind(this, getTransitionDuration(options)));
 	        }
