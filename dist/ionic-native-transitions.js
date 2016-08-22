@@ -397,6 +397,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return this;
 	        }
 	
+	        function hideKeyboard() {
+	            if (cordova && cordova.plugins && cordova.plugins.Keyboard) {
+	                cordova.plugins.Keyboard.close();
+	            }
+	        }
+	
 	        function transition() {
 	            if (!isEnabled()) {
 	                return;
@@ -429,6 +435,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	                options = defaultTransition;
 	            }
 	            options = angular.copy(options);
+	
+	            // Hide keyboard if present to avoid flickering keyboard on android
+	            hideKeyboard();
+	            $timeout(function () {
+	                launchTransition(options);
+	            });
+	        }
+	
+	        function launchTransition(options) {
 	            $log.debug('[native transition]', options);
 	            var type = options.type;
 	            delete options.type;
