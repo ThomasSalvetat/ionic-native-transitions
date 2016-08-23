@@ -324,21 +324,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var stateOptions = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 	            var transitionOptions = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
 	
-	            if (!state) {
-	                $log.debug('[native transition] cannot change state without a state...');
-	                return;
-	            }
+	            var keyboardEvent = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
 	
-	            if ($state.is(state, stateParams) && !stateOptions.reload) {
-	                $log.debug('[native transition] same state transition are not possible');
-	                return;
-	            }
+	            if (cordova && cordova.plugins && cordova.plugins.Keyboard && cordova.plugins.Keyboard.isVisible) {
+	                var arg = arguments;
+	                var fn = function fn() {
+	                    [].push.call(arg, fn);
+	                    stateGo.apply('null', arg);
+	                };
+	                window.addEventListener('native.keyboardhide', fn);
+	                hideKeyboard();
+	            } else {
 	
-	            unregisterToStateChangeStartEvent();
-	            transition(transitionOptions);
-	            return $timeout(function () {
-	                return $state.go(state, stateParams, stateOptions);
-	            });
+	                if (keyboardEvent) {
+	                    window.removeEventListener('native.keyboardhide', event);
+	                }
+	
+	                if (!state) {
+	                    $log.debug('[native transition] cannot change state without a state...');
+	                    return;
+	                }
+	
+	                if ($state.is(state, stateParams) && !stateOptions.reload) {
+	                    $log.debug('[native transition] same state transition are not possible');
+	                    return;
+	                }
+	
+	                unregisterToStateChangeStartEvent();
+	                transition(transitionOptions);
+	                return $timeout(function () {
+	                    return $state.go(state, stateParams, stateOptions);
+	                });
+	            }
 	        }
 	
 	        /**
@@ -623,6 +640,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        /**
 	         * @ngdoc function
+	         * @name ionic-native-transitions.$ionicNativeTransitions#hideKeyboard
+	         * @access private
+	         * @methodOf ionic-native-transitions.$ionicNativeTransitions
+	         * @description Hide keyboard with ionic keyboard plugin if presents
+	         */
+	        function hideKeyboard() {
+	            if (cordova && cordova.plugins && cordova.plugins.Keyboard) {
+	                cordova.plugins.Keyboard.close();
+	            }
+	        }
+	
+	        /**
+	         * @ngdoc function
 	         * @name ionic-native-transitions.$ionicNativeTransitions#goBack
 	         * @access public
 	         * @methodOf ionic-native-transitions.$ionicNativeTransitions
@@ -630,52 +660,68 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * @param {number} backCount - The number of views to go back to. default will be the previous view
 	         */
 	        function goBack(backCount) {
+	            var keyboardEvent = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 	
-	            if (!$ionicHistory.backView()) {
-	                // Close the app when no more history
-	                if (navigator.app) {
-	                    navigator.app.exitApp();
-	                }
-	                return;
-	            }
-	            if (backCount >= 0) {
-	                return;
-	            }
-	            var stateName = $ionicHistory.backView().stateName;
+	            if (cordova && cordova.plugins && cordova.plugins.Keyboard && cordova.plugins.Keyboard.isVisible) {
+	                var arg = Array.prototype.slice.call(arguments);
+	                var fn = function fn() {
+	                    arg[1] = fn;
+	                    goBack.apply('null', arg);
+	                };
+	                window.addEventListener('native.keyboardhide', fn);
+	                hideKeyboard();
+	            } else {
 	
-	            // Use backCount to find next state only if its defined, else pass as it is to $ionicHistory.goBack
-	            // which defaults to previous view transition
-	            // Get current history stack and find the cursor for the new view
-	            // Based on the new cursor, find the new state to transition to
-	            if (!!backCount && !isNaN(parseInt(backCount))) {
-	                var viewHistory = $ionicHistory.viewHistory();
-	                var currentHistory = viewHistory.histories[$ionicHistory.currentView().historyId];
-	                var newCursor = currentHistory.cursor + backCount;
-	
-	                // If new cursor is more than the max possible or less than zero, default it to first view in history
-	                if (newCursor < 0 || newCursor > currentHistory.stack.length) {
-	                    newCursor = 0;
+	                if (keyboardEvent) {
+	                    window.removeEventListener('native.keyboardhide', event);
 	                }
 	
-	                stateName = currentHistory.stack[newCursor].stateName;
-	            }
-	            var currentStateTransition = angular.extend({}, $state.current);
-	            var toStateTransition = angular.extend({}, $state.get(stateName));
+	                if (!$ionicHistory.backView()) {
+	                    // Close the app when no more history
+	                    if (navigator.app) {
+	                        navigator.app.exitApp();
+	                    }
+	                    return;
+	                }
+	                if (backCount >= 0) {
+	                    return;
+	                }
+	                var stateName = $ionicHistory.backView().stateName;
 	
-	            unregisterToStateChangeStartEvent();
-	            if (toStateTransition.nativeTransitionsBack === null) {
-	                $log.debug('[native transition] transition disabled for this state', toStateTransition);
+	                // Use backCount to find next state only if its defined, else pass as it is to $ionicHistory.goBack
+	                // which defaults to previous view transition
+	                // Get current history stack and find the cursor for the new view
+	                // Based on the new cursor, find the new state to transition to
+	                if (!!backCount && !isNaN(parseInt(backCount))) {
+	                    var viewHistory = $ionicHistory.viewHistory();
+	                    var currentHistory = viewHistory.histories[$ionicHistory.currentView().historyId];
+	                    var newCursor = currentHistory.cursor + backCount;
+	
+	                    // If new cursor is more than the max possible or less than zero, default it to first view in history
+	                    if (newCursor < 0 || newCursor > currentHistory.stack.length) {
+	                        newCursor = 0;
+	                    }
+	
+	                    stateName = currentHistory.stack[newCursor].stateName;
+	                }
+	                var currentStateTransition = angular.extend({}, $state.current);
+	                var toStateTransition = angular.extend({}, $state.get(stateName));
+	
+	                unregisterToStateChangeStartEvent();
+	                if (toStateTransition.nativeTransitionsBack === null) {
+	                    $log.debug('[native transition] transition disabled for this state', toStateTransition);
+	                    return $timeout(function () {
+	                        return $ionicHistory.goBack(backCount);
+	                    }).then(function () {
+	                        return registerToStateChangeStartEvent();
+	                    });
+	                }
+	                $log.debug('nativepagetransitions goBack', backCount, stateName, currentStateTransition, toStateTransition);
+	                transition('back', currentStateTransition, toStateTransition);
 	                return $timeout(function () {
 	                    return $ionicHistory.goBack(backCount);
-	                }).then(function () {
-	                    return registerToStateChangeStartEvent();
 	                });
 	            }
-	            $log.debug('nativepagetransitions goBack', backCount, stateName, currentStateTransition, toStateTransition);
-	            transition('back', currentStateTransition, toStateTransition);
-	            return $timeout(function () {
-	                return $ionicHistory.goBack(backCount);
-	            });
 	        }
 	    }
 	};
