@@ -326,7 +326,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	            var keyboardEvent = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
 	
-	            if (cordova && cordova.plugins && cordova.plugins.Keyboard && cordova.plugins.Keyboard.isVisible) {
+	            if (window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard && window.cordova.plugins.Keyboard.isVisible) {
 	                var arg = arguments;
 	                var fn = function fn() {
 	                    [].push.call(arg, fn);
@@ -646,8 +646,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * @description Hide keyboard with ionic keyboard plugin if presents
 	         */
 	        function hideKeyboard() {
-	            if (cordova && cordova.plugins && cordova.plugins.Keyboard) {
-	                cordova.plugins.Keyboard.close();
+	            if (window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard) {
+	                window.cordova.plugins.Keyboard.close();
 	            }
 	        }
 	
@@ -662,7 +662,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        function goBack(backCount) {
 	            var keyboardEvent = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 	
-	            if (cordova && cordova.plugins && cordova.plugins.Keyboard && cordova.plugins.Keyboard.isVisible) {
+	            if (window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard && window.cordova.plugins.Keyboard.isVisible) {
 	                var arg = Array.prototype.slice.call(arguments);
 	                var fn = function fn() {
 	                    arg[1] = fn;
