@@ -326,7 +326,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	            var keyboardEvent = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
 	
-	            if (window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard && window.cordova.plugins.Keyboard.isVisible) {
+	            if (window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard && window.cordova.plugins.Keyboard.isVisible && !keyboardEvent) {
 	                var arg = arguments;
 	                var fn = function fn() {
 	                    [].push.call(arg, fn);
@@ -337,7 +337,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            } else {
 	
 	                if (keyboardEvent) {
-	                    window.removeEventListener('native.keyboardhide', event);
+	                    window.removeEventListener('native.keyboardhide', keyboardEvent);
 	                }
 	
 	                if (!state) {
