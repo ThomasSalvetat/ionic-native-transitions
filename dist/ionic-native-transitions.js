@@ -326,7 +326,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	            var keyboardEvent = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
 	
-	            if (!ionic.Platform.isIOS() && window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard && window.cordova.plugins.Keyboard.isVisible && !keyboardEvent) {
+	            if (window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard && window.cordova.plugins.Keyboard.isVisible && !keyboardEvent) {
 	                var arg = Array.prototype.slice.call(arguments);
 	                var fn = function fn() {
 	                    arg[4] = fn;
@@ -452,15 +452,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                options = defaultTransition;
 	            }
 	            options = angular.copy(options);
-	
-	            // Hide keyboard if present to avoid flickering keyboard on android
-	            hideKeyboard();
-	            $timeout(function () {
-	                launchTransition(options);
-	            });
-	        }
-	
-	        function launchTransition(options) {
 	            $log.debug('[native transition]', options);
 	            var type = options.type;
 	            delete options.type;
@@ -662,7 +653,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        function goBack(backCount) {
 	            var keyboardEvent = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 	
-	            if (!ionic.Platform.isIOS() && window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard && window.cordova.plugins.Keyboard.isVisible && !keyboardEvent) {
+	            if (window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard && window.cordova.plugins.Keyboard.isVisible && !keyboardEvent) {
 	                var arg = Array.prototype.slice.call(arguments);
 	                var fn = function fn() {
 	                    arg[1] = fn;
